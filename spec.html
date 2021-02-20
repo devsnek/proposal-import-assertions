@@ -65,20 +65,7 @@
       <emu-clause id="sec-import-call-runtime-semantics-evaluation">
         <h1>Runtime Semantics: Evaluation</h1>
 
-        <emu-grammar>ImportCall : `import` `(` AssignmentExpression `,`? `)`</emu-grammar>
-        <emu-alg>
-          1. Let _referencingScriptOrModule_ be ! GetActiveScriptOrModule().
-          1. Let _argRef_ be the result of evaluating |AssignmentExpression|.
-          1. Let _specifier_ be ? GetValue(_argRef_).
-          1. Let _promiseCapability_ be ! NewPromiseCapability(%Promise%).
-          1. Let _specifierString_ be ToString(_specifier_).
-          1. IfAbruptRejectPromise(_specifierString_, _promiseCapability_).
-          1. <ins>Let _moduleRequest_ be a new ModuleRequest Record { [[Specifier]]: _specifierString_, [[Assertions]]: an empty List }.</ins>
-          1. Perform ! HostImportModuleDynamically(_referencingScriptOrModule_, <del>_specifierString_,</del> <ins>_moduleRequest_,</ins> _promiseCapability_).
-          1. Return _promiseCapability_.[[Promise]].
-        </emu-alg>
-
-        <ins><emu-grammar>ImportCall : `import` `(` AssignmentExpression `,` AssignmentExpression `,`? `)`</emu-grammar></ins>
+        <ins><emu-grammar>ImportCall : `import` `(` AssignmentExpression `,`? AssignmentExpression? `,`? `)`</emu-grammar></ins>
         <emu-alg>
           1. Let _referencingScriptOrModule_ be ! GetActiveScriptOrModule().
           1. Let _argRef_ be the result of evaluating <ins>the first</ins> |AssignmentExpression|.
@@ -86,20 +73,25 @@
           1. Let _promiseCapability_ be ! NewPromiseCapability(%Promise%).
           1. Let _specifierString_ be ToString(_specifier_).
           1. IfAbruptRejectPromise(_specifierString_, _promiseCapability_).
-          1. <ins>Let _argRef_ be the result of evaluating the second |AssignmentExpression|.</ins>
-          1. <ins>Let _arg_ be ? GetValue(_argRef_).</ins>
-          1. <ins>If _arg_ is *undefined*, let _assertions_ be an empty List.</ins>
-          1. <ins>Otherwise,</ins>
-            1. <ins>Let _supportedAssertions_ ! HostGetSupportedImportAssertions().</ins>
-            1. <ins>Let _assertionsObj_ be ? Get(_arg_, *"assert"*).</ins>
-            1. <ins>Let _assertions_ be a new empty List.</ins>
-            1. <ins>Let _keys_ be EnumerableOwnPropertyNames(_assertionsObj_, ~key~).</ins>
-            1. <ins>IfAbruptRejectPromise(_keys_, _promiseCapability_).</ins>
-            1. <ins>For each String _key_ of _keys_, if _key_ is an entry of _supportedAssertions_,</ins>
-              1. <ins>Let _value_ be Get(_assertionsObj_, _key_).</ins>
-              1. <ins>IfAbruptRejectPromise(_value_, _promiseCapability_).</ins>
-              1. <ins>Append { [[Key]]: _key_, [[Value]]: _value_ } to _assertions_.</ins>
-            1. <ins>Sort _assertions_ by the code point order of the [[Key]] of each entry.  NOTE: This sorting is observable only in that hosts are prohibited from distinguishing among assertions by the order they occur in.</ens>
+          1. <ins>Let _assertions_ be a new empty List.</ins>
+          1. <ins>If the second |AssignmentExpression| is present,</ins>
+            1. <ins>Let _argRef_ be the result of evaluating the second |AssignmentExpression|.</ins>
+            1. <ins>Let _arg_ be ? GetValue(_argRef_).</ins>
+            1. <ins>If _arg_ is not *undefined*,</ins>
+              1. <ins>Let _supportedAssertions_ ! HostGetSupportedImportAssertions().</ins>
+              1. <ins>Let _assertionsObj_ be ? Get(_arg_, *"assert"*).</ins>
+              1. <ins>If _assertionsObj_ is not *undefined*,</ins>
+                1. <ins>If Type(_assertionsObj_) is not Object,</ins>
+                  1. <ins>Let _error_ be a new *TypeError* exception.</ins>
+                  1. <ins>Let _completion_ be ThrowCompletion(_error_).</ins>
+                  1. <ins>IfAbruptRejectPromise(_completion_, _promiseCapability_).</ins>
+                1. <ins>Let _keys_ be EnumerableOwnPropertyNames(_assertionsObj_, ~key~).</ins>
+                1. <ins>IfAbruptRejectPromise(_keys_, _promiseCapability_).</ins>
+                1. <ins>For each String _key_ of _keys_, if _key_ is an entry of _supportedAssertions_,</ins>
+                  1. <ins>Let _value_ be Get(_assertionsObj_, _key_).</ins>
+                  1. <ins>IfAbruptRejectPromise(_value_, _promiseCapability_).</ins>
+                  1. <ins>Append { [[Key]]: _key_, [[Value]]: _value_ } to _assertions_.</ins>
+                1. <ins>Sort _assertions_ by the code point order of the [[Key]] of each entry.  NOTE: This sorting is observable only in that hosts are prohibited from distinguishing among assertions by the order they occur in.</ens>
           1. <ins>Let _moduleRequest_ be a new ModuleRequest Record { [[Specifier]]: _specifierString_, [[Assertions]]: _assertions_ }.</ins>
           1. Perform ! HostImportModuleDynamically(_referencingScriptOrModule_, <del>_specifierString_,</del> <ins>_moduleRequest_,</ins> _promiseCapability_).
           1. Return _promiseCapability_.[[Promise]].
